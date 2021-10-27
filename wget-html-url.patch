@@ -1,0 +1,10 @@
+--- wget-1.21.2/src/html-url.c	2021-09-07 21:57:24.000000000 +0300
++++ wget-1.21.2/src/html-url-extended.c	2021-10-27 22:22:01.546669643 +0300
+@@ -158,6 +158,7 @@
+   { TAG_IMG,            "href",         ATTR_INLINE },
+   { TAG_IMG,            "lowsrc",       ATTR_INLINE },
+   { TAG_IMG,            "src",          ATTR_INLINE },
++  { TAG_IMG,            "data-src",     ATTR_INLINE },
+   { TAG_INPUT,          "src",          ATTR_INLINE },
+   { TAG_LAYER,          "src",          ATTR_INLINE | ATTR_HTML },
+   { TAG_OBJECT,         "data",         ATTR_INLINE },
