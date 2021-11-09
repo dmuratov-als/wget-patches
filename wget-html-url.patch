@@ -9,3 +9,12 @@
    { TAG_INPUT,          "src",          ATTR_INLINE },
    { TAG_LAYER,          "src",          ATTR_INLINE | ATTR_HTML },
    { TAG_OBJECT,         "data",         ATTR_INLINE },
+@@ -168,6 +170,8 @@
+   { TAG_TH,             "background",   ATTR_INLINE },
+   { TAG_VIDEO,          "src",          ATTR_INLINE },
+   { TAG_VIDEO,          "poster",       ATTR_INLINE },
++  { TAG_VIDEO,          "data-src",     ATTR_INLINE },
++  { TAG_VIDEO,          "data-href",    ATTR_INLINE },
+   { TAG_AUDIO,          "src",          ATTR_INLINE },
+   { TAG_AUDIO,          "poster",       ATTR_INLINE },
+   { TAG_SOURCE,         "src",          ATTR_INLINE }
