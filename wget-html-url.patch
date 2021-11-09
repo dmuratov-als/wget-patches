@@ -1,6 +1,15 @@
 --- wget-1.21.2/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
-+++ wget-1.21.2/src/html-url-extended.c	2021-11-10 00:02:23.694259075 +0300
-@@ -158,6 +158,8 @@
++++ wget-1.21.2/src/html-url-extended.c	2021-11-10 00:17:48.735889945 +0300
+@@ -146,6 +146,8 @@
+   int flags;
+ } tag_url_attributes[] = {
+   { TAG_A,              "href",         ATTR_HTML },
++  { TAG_A,              "data-src",     ATTR_INLINE | ATTR_HTML },
++  { TAG_A,              "data-href",    ATTR_INLINE | ATTR_HTML },
+   { TAG_APPLET,         "code",         ATTR_INLINE },
+   { TAG_AREA,           "href",         ATTR_HTML },
+   { TAG_BGSOUND,        "src",          ATTR_INLINE },
+@@ -158,19 +160,29 @@
    { TAG_IMG,            "href",         ATTR_INLINE },
    { TAG_IMG,            "lowsrc",       ATTR_INLINE },
    { TAG_IMG,            "src",          ATTR_INLINE },
@@ -9,7 +18,12 @@
    { TAG_INPUT,          "src",          ATTR_INLINE },
    { TAG_LAYER,          "src",          ATTR_INLINE | ATTR_HTML },
    { TAG_OBJECT,         "data",         ATTR_INLINE },
-@@ -168,6 +170,8 @@
+   { TAG_OVERLAY,        "src",          ATTR_INLINE | ATTR_HTML },
+   { TAG_SCRIPT,         "src",          ATTR_INLINE },
++  { TAG_SCRIPT,         "data-src",     ATTR_INLINE },
++  { TAG_SCRIPT,         "data-href",    ATTR_INLINE },
+   { TAG_TABLE,          "background",   ATTR_INLINE },
+   { TAG_TD,             "background",   ATTR_INLINE },
    { TAG_TH,             "background",   ATTR_INLINE },
    { TAG_VIDEO,          "src",          ATTR_INLINE },
    { TAG_VIDEO,          "poster",       ATTR_INLINE },
@@ -17,4 +31,12 @@
 +  { TAG_VIDEO,          "data-href",    ATTR_INLINE },
    { TAG_AUDIO,          "src",          ATTR_INLINE },
    { TAG_AUDIO,          "poster",       ATTR_INLINE },
-   { TAG_SOURCE,         "src",          ATTR_INLINE }
+-  { TAG_SOURCE,         "src",          ATTR_INLINE }
++  { TAG_AUDIO,          "data-src",     ATTR_INLINE },
++  { TAG_AUDIO,          "data-href",    ATTR_INLINE },
++  { TAG_SOURCE,         "src",          ATTR_INLINE },
++  { TAG_SOURCE,         "data-src",     ATTR_INLINE },
++  { TAG_SOURCE,         "data-href",    ATTR_INLINE }
+ };
+ 
+ /* The lists of interesting tags and attributes are built dynamically,
