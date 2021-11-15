@@ -1,5 +1,5 @@
 --- wget-1.21.2/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
-+++ wget-1.21.2/src/html-url-extended.c	2021-11-10 01:59:00.586998569 +0300
++++ wget-1.21.2/src/html-url-extended.c	2021-11-15 23:02:56.833144976 +0300
 @@ -84,6 +84,7 @@
    TAG_TH,
    TAG_VIDEO,
@@ -16,21 +16,23 @@
    { TAG_SOURCE,  "source",      tag_find_urls }
  };
  
-@@ -146,6 +148,8 @@
+@@ -146,6 +148,9 @@
    int flags;
  } tag_url_attributes[] = {
    { TAG_A,              "href",         ATTR_HTML },
 +  { TAG_A,              "data-src",     ATTR_INLINE | ATTR_HTML },
 +  { TAG_A,              "data-href",    ATTR_INLINE | ATTR_HTML },
++  { TAG_A,              "data-url",     ATTR_INLINE | ATTR_HTML },
    { TAG_APPLET,         "code",         ATTR_INLINE },
    { TAG_AREA,           "href",         ATTR_HTML },
    { TAG_BGSOUND,        "src",          ATTR_INLINE },
-@@ -158,19 +162,32 @@
+@@ -158,19 +163,38 @@
    { TAG_IMG,            "href",         ATTR_INLINE },
    { TAG_IMG,            "lowsrc",       ATTR_INLINE },
    { TAG_IMG,            "src",          ATTR_INLINE },
 +  { TAG_IMG,            "data-src",     ATTR_INLINE },
 +  { TAG_IMG,            "data-href",    ATTR_INLINE },
++  { TAG_IMG,            "data-url",     ATTR_INLINE },
    { TAG_INPUT,          "src",          ATTR_INLINE },
    { TAG_LAYER,          "src",          ATTR_INLINE | ATTR_HTML },
    { TAG_OBJECT,         "data",         ATTR_INLINE },
@@ -38,6 +40,7 @@
    { TAG_SCRIPT,         "src",          ATTR_INLINE },
 +  { TAG_SCRIPT,         "data-src",     ATTR_INLINE },
 +  { TAG_SCRIPT,         "data-href",    ATTR_INLINE },
++  { TAG_SCRIPT,         "data-url",     ATTR_INLINE },
    { TAG_TABLE,          "background",   ATTR_INLINE },
    { TAG_TD,             "background",   ATTR_INLINE },
    { TAG_TH,             "background",   ATTR_INLINE },
@@ -45,21 +48,25 @@
    { TAG_VIDEO,          "poster",       ATTR_INLINE },
 +  { TAG_VIDEO,          "data-src",     ATTR_INLINE },
 +  { TAG_VIDEO,          "data-href",    ATTR_INLINE },
++  { TAG_VIDEO,          "data-url",     ATTR_INLINE },
    { TAG_AUDIO,          "src",          ATTR_INLINE },
    { TAG_AUDIO,          "poster",       ATTR_INLINE },
 -  { TAG_SOURCE,         "src",          ATTR_INLINE }
 +  { TAG_AUDIO,          "data-src",     ATTR_INLINE },
 +  { TAG_AUDIO,          "data-href",    ATTR_INLINE },
++  { TAG_AUDIO,          "data-url",     ATTR_INLINE },
 +  { TAG_TRACK,          "src",          ATTR_INLINE },
 +  { TAG_TRACK,          "data-src",     ATTR_INLINE },
 +  { TAG_TRACK,          "data-href",    ATTR_INLINE },
++  { TAG_TRACK,          "data-url",     ATTR_INLINE },
 +  { TAG_SOURCE,         "src",          ATTR_INLINE },
 +  { TAG_SOURCE,         "data-src",     ATTR_INLINE },
-+  { TAG_SOURCE,         "data-href",    ATTR_INLINE }
++  { TAG_SOURCE,         "data-href",    ATTR_INLINE },
++  { TAG_SOURCE,         "data-url",     ATTR_INLINE }
  };
  
  /* The lists of interesting tags and attributes are built dynamically,
-@@ -530,7 +547,7 @@
+@@ -530,7 +554,7 @@
       known not to be, such as style sheet and shortcut icon:
  
       <link rel="stylesheet" href="..."> or <link rel="alternate stylesheet" href="...">
@@ -68,7 +75,7 @@
    */
    if (href)
      {
-@@ -546,7 +563,7 @@
+@@ -546,7 +570,7 @@
                    up->link_inline_p = 1;
                    up->link_expect_css = 1;
                  }
