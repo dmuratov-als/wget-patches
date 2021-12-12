@@ -1,72 +1,192 @@
 --- wget-1.21.2/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
-+++ wget-1.21.2/src/html-url-extended.c	2021-11-15 23:02:56.833144976 +0300
-@@ -84,6 +84,7 @@
++++ wget-1.21.2/src/html-url-extended.c	2021-12-12 15:56:21.213074197 +0300
+@@ -63,28 +63,35 @@
+   TAG_A,
+   TAG_APPLET,
+   TAG_AREA,
++  TAG_AUDIO,
+   TAG_BASE,
+   TAG_BGSOUND,
++  TAG_BLOCKQUOTE,
+   TAG_BODY,
++  TAG_BUTTON,
++  TAG_DEL,
+   TAG_EMBED,
+   TAG_FIG,
+   TAG_FORM,
+   TAG_FRAME,
+   TAG_IFRAME,
++  TAG_IMAGE,
+   TAG_IMG,
+   TAG_INPUT,
++  TAG_INS,
+   TAG_LAYER,
+   TAG_LINK,
+   TAG_META,
+   TAG_OBJECT,
+   TAG_OVERLAY,
++  TAG_Q,
+   TAG_SCRIPT,
++  TAG_SOURCE,
+   TAG_TABLE,
+   TAG_TD,
    TAG_TH,
-   TAG_VIDEO,
-   TAG_AUDIO,
+-  TAG_VIDEO,
+-  TAG_AUDIO,
+-  TAG_SOURCE
 +  TAG_TRACK,
-   TAG_SOURCE
++  TAG_VIDEO
  };
  
-@@ -118,6 +119,7 @@
-   { TAG_TH,      "th",          tag_find_urls },
-   { TAG_VIDEO,   "video",       tag_find_urls },
-   { TAG_AUDIO,   "audio",       tag_find_urls },
-+  { TAG_TRACK,   "track",       tag_find_urls },
-   { TAG_SOURCE,  "source",      tag_find_urls }
+ /* The list of known tags and functions used for handling them.  Most
+@@ -94,31 +101,38 @@
+   const char *name;
+   tag_handler_t handler;
+ } known_tags[] = {
+-  { TAG_A,       "a",           tag_find_urls },
+-  { TAG_APPLET,  "applet",      tag_find_urls },
+-  { TAG_AREA,    "area",        tag_find_urls },
+-  { TAG_BASE,    "base",        tag_handle_base },
+-  { TAG_BGSOUND, "bgsound",     tag_find_urls },
+-  { TAG_BODY,    "body",        tag_find_urls },
+-  { TAG_EMBED,   "embed",       tag_find_urls },
+-  { TAG_FIG,     "fig",         tag_find_urls },
+-  { TAG_FORM,    "form",        tag_handle_form },
+-  { TAG_FRAME,   "frame",       tag_find_urls },
+-  { TAG_IFRAME,  "iframe",      tag_find_urls },
+-  { TAG_IMG,     "img",         tag_handle_img },
+-  { TAG_INPUT,   "input",       tag_find_urls },
+-  { TAG_LAYER,   "layer",       tag_find_urls },
+-  { TAG_LINK,    "link",        tag_handle_link },
+-  { TAG_META,    "meta",        tag_handle_meta },
+-  { TAG_OBJECT,  "object",      tag_find_urls },
+-  { TAG_OVERLAY, "overlay",     tag_find_urls },
+-  { TAG_SCRIPT,  "script",      tag_find_urls },
+-  { TAG_TABLE,   "table",       tag_find_urls },
+-  { TAG_TD,      "td",          tag_find_urls },
+-  { TAG_TH,      "th",          tag_find_urls },
+-  { TAG_VIDEO,   "video",       tag_find_urls },
+-  { TAG_AUDIO,   "audio",       tag_find_urls },
+-  { TAG_SOURCE,  "source",      tag_find_urls }
++  { TAG_A,          "a",          tag_find_urls },
++  { TAG_APPLET,     "applet",     tag_find_urls },
++  { TAG_AREA,       "area",       tag_find_urls },
++  { TAG_AUDIO,      "audio",      tag_find_urls },
++  { TAG_BASE,       "base",       tag_handle_base },
++  { TAG_BGSOUND,    "bgsound",    tag_find_urls },
++  { TAG_BLOCKQUOTE, "blockquote", tag_find_urls },
++  { TAG_BODY,       "body",       tag_find_urls },
++  { TAG_BUTTON,     "button",     tag_handle_form },
++  { TAG_DEL,        "del",        tag_find_urls },
++  { TAG_EMBED,      "embed",      tag_find_urls },
++  { TAG_FIG,        "fig",        tag_find_urls },
++  { TAG_FORM,       "form",       tag_handle_form },
++  { TAG_FRAME,      "frame",      tag_find_urls },
++  { TAG_IFRAME,     "iframe",     tag_find_urls },
++  { TAG_IMAGE,      "image",      tag_find_urls },
++  { TAG_IMG,        "img",        tag_handle_img },
++  { TAG_INPUT,      "input",      tag_find_urls },
++  { TAG_INS,        "ins",        tag_find_urls },
++  { TAG_LAYER,      "layer",      tag_find_urls },
++  { TAG_LINK,       "link",       tag_handle_link },
++  { TAG_META,       "meta",       tag_handle_meta },
++  { TAG_OBJECT,     "object",     tag_find_urls },
++  { TAG_OVERLAY,    "overlay",    tag_find_urls },
++  { TAG_Q,          "q",          tag_find_urls },
++  { TAG_SCRIPT,     "script",     tag_find_urls },
++  { TAG_SOURCE,     "source",     tag_find_urls },
++  { TAG_TABLE,      "table",      tag_find_urls },
++  { TAG_TD,         "td",         tag_find_urls },
++  { TAG_TH,         "th",         tag_find_urls },
++  { TAG_TRACK,      "track",      tag_find_urls },
++  { TAG_VIDEO,      "video",      tag_find_urls }
  };
  
-@@ -146,6 +148,9 @@
+ /* tag_url_attributes documents which attributes of which tags contain
+@@ -146,31 +160,61 @@
    int flags;
  } tag_url_attributes[] = {
    { TAG_A,              "href",         ATTR_HTML },
-+  { TAG_A,              "data-src",     ATTR_INLINE | ATTR_HTML },
+-  { TAG_APPLET,         "code",         ATTR_INLINE },
 +  { TAG_A,              "data-href",    ATTR_INLINE | ATTR_HTML },
++  { TAG_A,              "data-src",     ATTR_INLINE | ATTR_HTML },
 +  { TAG_A,              "data-url",     ATTR_INLINE | ATTR_HTML },
-   { TAG_APPLET,         "code",         ATTR_INLINE },
++  { TAG_APPLET,         "codebase",     ATTR_INLINE },
    { TAG_AREA,           "href",         ATTR_HTML },
++  { TAG_AUDIO,          "src",          ATTR_INLINE },
++  { TAG_AUDIO,          "poster",       ATTR_INLINE },
++  { TAG_AUDIO,          "data-href",    ATTR_INLINE },
++  { TAG_AUDIO,          "data-src",     ATTR_INLINE },
++  { TAG_AUDIO,          "data-url",     ATTR_INLINE },
    { TAG_BGSOUND,        "src",          ATTR_INLINE },
-@@ -158,19 +163,38 @@
++  { TAG_BLOCKQUOTE,     "cite",         ATTR_INLINE },
+   { TAG_BODY,           "background",   ATTR_INLINE },
++  { TAG_DEL,            "cite",         ATTR_INLINE },
+   { TAG_EMBED,          "href",         ATTR_HTML },
+   { TAG_EMBED,          "src",          ATTR_INLINE | ATTR_HTML },
+   { TAG_FIG,            "src",          ATTR_INLINE },
+   { TAG_FRAME,          "src",          ATTR_INLINE | ATTR_HTML },
+   { TAG_IFRAME,         "src",          ATTR_INLINE | ATTR_HTML },
++  { TAG_IMAGE,          "href",         ATTR_INLINE },
    { TAG_IMG,            "href",         ATTR_INLINE },
++  { TAG_IMG,            "longdesc",     ATTR_INLINE | ATTR_HTML },
    { TAG_IMG,            "lowsrc",       ATTR_INLINE },
    { TAG_IMG,            "src",          ATTR_INLINE },
-+  { TAG_IMG,            "data-src",     ATTR_INLINE },
 +  { TAG_IMG,            "data-href",    ATTR_INLINE },
++  { TAG_IMG,            "data-src",     ATTR_INLINE },
 +  { TAG_IMG,            "data-url",     ATTR_INLINE },
    { TAG_INPUT,          "src",          ATTR_INLINE },
++  { TAG_INS,            "cite",         ATTR_INLINE },
    { TAG_LAYER,          "src",          ATTR_INLINE | ATTR_HTML },
++  { TAG_OBJECT,         "classid",      ATTR_INLINE },
++  { TAG_OBJECT,         "codebase",     ATTR_INLINE },
    { TAG_OBJECT,         "data",         ATTR_INLINE },
    { TAG_OVERLAY,        "src",          ATTR_INLINE | ATTR_HTML },
++  { TAG_Q,              "cite",         ATTR_INLINE },
    { TAG_SCRIPT,         "src",          ATTR_INLINE },
-+  { TAG_SCRIPT,         "data-src",     ATTR_INLINE },
 +  { TAG_SCRIPT,         "data-href",    ATTR_INLINE },
++  { TAG_SCRIPT,         "data-src",     ATTR_INLINE },
 +  { TAG_SCRIPT,         "data-url",     ATTR_INLINE },
++  { TAG_SOURCE,         "src",          ATTR_INLINE },
++  { TAG_SOURCE,         "data-href",    ATTR_INLINE },
++  { TAG_SOURCE,         "data-src",     ATTR_INLINE },
++  { TAG_SOURCE,         "data-url",     ATTR_INLINE },
    { TAG_TABLE,          "background",   ATTR_INLINE },
    { TAG_TD,             "background",   ATTR_INLINE },
    { TAG_TH,             "background",   ATTR_INLINE },
++  { TAG_TRACK,          "src",          ATTR_INLINE },
++  { TAG_TRACK,          "data-href",    ATTR_INLINE },
++  { TAG_TRACK,          "data-src",     ATTR_INLINE },
++  { TAG_TRACK,          "data-url",     ATTR_INLINE },
    { TAG_VIDEO,          "src",          ATTR_INLINE },
    { TAG_VIDEO,          "poster",       ATTR_INLINE },
-+  { TAG_VIDEO,          "data-src",     ATTR_INLINE },
-+  { TAG_VIDEO,          "data-href",    ATTR_INLINE },
-+  { TAG_VIDEO,          "data-url",     ATTR_INLINE },
-   { TAG_AUDIO,          "src",          ATTR_INLINE },
-   { TAG_AUDIO,          "poster",       ATTR_INLINE },
+-  { TAG_AUDIO,          "src",          ATTR_INLINE },
+-  { TAG_AUDIO,          "poster",       ATTR_INLINE },
 -  { TAG_SOURCE,         "src",          ATTR_INLINE }
-+  { TAG_AUDIO,          "data-src",     ATTR_INLINE },
-+  { TAG_AUDIO,          "data-href",    ATTR_INLINE },
-+  { TAG_AUDIO,          "data-url",     ATTR_INLINE },
-+  { TAG_TRACK,          "src",          ATTR_INLINE },
-+  { TAG_TRACK,          "data-src",     ATTR_INLINE },
-+  { TAG_TRACK,          "data-href",    ATTR_INLINE },
-+  { TAG_TRACK,          "data-url",     ATTR_INLINE },
-+  { TAG_SOURCE,         "src",          ATTR_INLINE },
-+  { TAG_SOURCE,         "data-src",     ATTR_INLINE },
-+  { TAG_SOURCE,         "data-href",    ATTR_INLINE },
-+  { TAG_SOURCE,         "data-url",     ATTR_INLINE }
++  { TAG_VIDEO,          "data-href",    ATTR_INLINE },
++  { TAG_VIDEO,          "data-src",     ATTR_INLINE },
++  { TAG_VIDEO,          "data-url",     ATTR_INLINE }
  };
  
  /* The lists of interesting tags and attributes are built dynamically,
-@@ -530,7 +554,7 @@
+@@ -183,6 +227,7 @@
+   "name",                       /* used by tag_handle_meta  */
+   "content",                    /* used by tag_handle_meta  */
+   "action",                     /* used by tag_handle_form  */
++  "formaction",                 /* used by tag_handle_form  */
+   "style",                      /* used by check_style_attr */
+   "srcset",                     /* used by tag_handle_img */
+ };
+@@ -500,7 +545,7 @@
+     ctx->base = xstrdup (newbase);
+ }
+ 
+-/* Mark the URL found in <form action=...> for conversion. */
++/* Mark the URL found in <form action=...> or <button formaction=...> for conversion. */
+ 
+ static void
+ tag_handle_form (int tagid _GL_UNUSED, struct taginfo *tag, struct map_context *ctx)
+@@ -530,7 +575,7 @@
       known not to be, such as style sheet and shortcut icon:
  
       <link rel="stylesheet" href="..."> or <link rel="alternate stylesheet" href="...">
@@ -75,7 +195,7 @@
    */
    if (href)
      {
-@@ -546,7 +570,7 @@
+@@ -546,7 +591,7 @@
                    up->link_inline_p = 1;
                    up->link_expect_css = 1;
                  }
