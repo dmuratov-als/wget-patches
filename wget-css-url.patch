@@ -1,0 +1,31 @@
+--- wget-1.21.2/src/css-url.c	2021-09-07 21:56:08.000000000 +0300
++++ wget-1.21.2/src/css-url-extended.c	2021-12-24 02:24:15.249568791 +0300
+@@ -68,9 +68,11 @@
+   Also adjust the starting position and length of the string.
+ 
+   A URI can be specified with or without quotes, and the quotes
+-  can be single or double quotes.  In addition there can be
+-  whitespace after the opening parenthesis and before the closing
+-  parenthesis.
++  can be single or double quotes.  There can also be an entity
++  instead of the symbol, see
++  https://stackoverflow.com/questions/51368208/angularjs-ng-style-quot-issue
++  In addition there can be whitespace after the opening parenthesis
++  and before the closing parenthesis.
+ */
+ static char *
+ get_uri_string (const char *at, int *pos, int *length)
+@@ -105,6 +107,13 @@
+       *length -= 2;
+     }
+ 
++  /* trim off &quot; */
++  if (*length >= 12 && (at[*pos] == '&quot;'))
++    {
++      (*pos)++;
++      *length -= 12;
++    }
++
+   if (*length <= 0)
+     return NULL;
+ 
