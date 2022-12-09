@@ -1,6 +1,6 @@
---- wget-1.21.2/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
-+++ wget-1.21.2/src/html-url-extended.c	2022-07-23 20:03:33.541168832 +0300
-@@ -61,30 +61,126 @@
+--- wget-1.21.3/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
++++ wget-1.21.3/src/html-url-extended.c	2022-12-09 15:06:13.986850689 +0300
+@@ -61,30 +61,127 @@
  
  enum {
    TAG_A,
@@ -125,12 +125,13 @@
 +  TAG_TT,
 +  TAG_U,
 +  TAG_UL,
++  TAG_USE,
 +  TAG_VAR,
 +  TAG_VIDEO
  };
  
  /* The list of known tags and functions used for handling them.  Most
-@@ -94,31 +190,127 @@
+@@ -94,31 +191,127 @@
    const char *name;
    tag_handler_t handler;
  } known_tags[] = {
@@ -283,7 +284,7 @@
  };
  
  /* tag_url_attributes documents which attributes of which tags contain
-@@ -145,32 +337,389 @@
+@@ -145,32 +338,394 @@
    const char *attr_name;
    int flags;
  } tag_url_attributes[] = {
@@ -688,6 +689,11 @@
 +  { TAG_UL,          "data-href",    ATTR_INLINE | ATTR_HTML },
 +  { TAG_UL,          "data-src",     ATTR_INLINE | ATTR_HTML },
 +  { TAG_UL,          "data-url",     ATTR_INLINE | ATTR_HTML },
++  { TAG_USE,         "href",         ATTR_INLINE },
++  { TAG_USE,         "src",          ATTR_INLINE },
++  { TAG_USE,         "data-href",    ATTR_INLINE | ATTR_HTML },
++  { TAG_USE,         "data-src",     ATTR_INLINE | ATTR_HTML },
++  { TAG_USE,         "data-url",     ATTR_INLINE | ATTR_HTML },
 +  { TAG_VAR,         "data-href",    ATTR_INLINE | ATTR_HTML },
 +  { TAG_VAR,         "data-src",     ATTR_INLINE | ATTR_HTML },
 +  { TAG_VAR,         "data-url",     ATTR_INLINE | ATTR_HTML },
@@ -699,7 +705,7 @@
  };
  
  /* The lists of interesting tags and attributes are built dynamically,
-@@ -181,8 +730,10 @@
+@@ -181,8 +736,10 @@
    "type",                       /* used by tag_handle_link  */
    "http-equiv",                 /* used by tag_handle_meta  */
    "name",                       /* used by tag_handle_meta  */
@@ -710,7 +716,7 @@
    "style",                      /* used by check_style_attr */
    "srcset",                     /* used by tag_handle_img */
  };
-@@ -500,7 +1051,7 @@
+@@ -500,7 +1057,7 @@
      ctx->base = xstrdup (newbase);
  }
  
@@ -719,7 +725,7 @@
  
  static void
  tag_handle_form (int tagid _GL_UNUSED, struct taginfo *tag, struct map_context *ctx)
-@@ -530,7 +1081,7 @@
+@@ -530,7 +1087,7 @@
       known not to be, such as style sheet and shortcut icon:
  
       <link rel="stylesheet" href="..."> or <link rel="alternate stylesheet" href="...">
@@ -728,7 +734,7 @@
    */
    if (href)
      {
-@@ -546,7 +1097,7 @@
+@@ -546,7 +1103,7 @@
                    up->link_inline_p = 1;
                    up->link_expect_css = 1;
                  }
@@ -737,7 +743,7 @@
                  {
                    up->link_inline_p = 1;
                  }
-@@ -571,13 +1122,16 @@
+@@ -571,13 +1128,16 @@
  }
  
  /* Handle the META tag.  This requires special handling because of the
@@ -756,7 +762,7 @@
  
    if (http_equiv && 0 == c_strcasecmp (http_equiv, "refresh"))
      {
-@@ -677,6 +1231,36 @@
+@@ -677,6 +1237,36 @@
              }
          }
      }
