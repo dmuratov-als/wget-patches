@@ -1,5 +1,5 @@
 --- wget-1.21.3/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
-+++ wget-1.21.3/src/html-url-extended.c	2022-12-09 15:06:13.986850689 +0300
++++ wget-1.21.3/src/html-url-extended.c	2022-12-09 15:38:21.442273023 +0300
 @@ -61,30 +61,127 @@
  
  enum {
@@ -131,7 +131,7 @@
  };
  
  /* The list of known tags and functions used for handling them.  Most
-@@ -94,31 +191,127 @@
+@@ -94,31 +191,128 @@
    const char *name;
    tag_handler_t handler;
  } known_tags[] = {
@@ -279,12 +279,13 @@
 +  { TAG_TT,          "tt",          tag_find_urls },
 +  { TAG_U,           "u",           tag_find_urls },
 +  { TAG_UL,          "ul",          tag_find_urls },
++  { TAG_USE,         "use",         tag_find_urls },
 +  { TAG_VAR,         "var",         tag_find_urls },
 +  { TAG_VIDEO,       "video",       tag_find_urls }
  };
  
  /* tag_url_attributes documents which attributes of which tags contain
-@@ -145,32 +338,394 @@
+@@ -145,32 +339,394 @@
    const char *attr_name;
    int flags;
  } tag_url_attributes[] = {
@@ -705,7 +706,7 @@
  };
  
  /* The lists of interesting tags and attributes are built dynamically,
-@@ -181,8 +736,10 @@
+@@ -181,8 +737,10 @@
    "type",                       /* used by tag_handle_link  */
    "http-equiv",                 /* used by tag_handle_meta  */
    "name",                       /* used by tag_handle_meta  */
@@ -716,7 +717,7 @@
    "style",                      /* used by check_style_attr */
    "srcset",                     /* used by tag_handle_img */
  };
-@@ -500,7 +1057,7 @@
+@@ -500,7 +1058,7 @@
      ctx->base = xstrdup (newbase);
  }
  
@@ -725,7 +726,7 @@
  
  static void
  tag_handle_form (int tagid _GL_UNUSED, struct taginfo *tag, struct map_context *ctx)
-@@ -530,7 +1087,7 @@
+@@ -530,7 +1088,7 @@
       known not to be, such as style sheet and shortcut icon:
  
       <link rel="stylesheet" href="..."> or <link rel="alternate stylesheet" href="...">
@@ -734,7 +735,7 @@
    */
    if (href)
      {
-@@ -546,7 +1103,7 @@
+@@ -546,7 +1104,7 @@
                    up->link_inline_p = 1;
                    up->link_expect_css = 1;
                  }
@@ -743,7 +744,7 @@
                  {
                    up->link_inline_p = 1;
                  }
-@@ -571,13 +1128,16 @@
+@@ -571,13 +1129,16 @@
  }
  
  /* Handle the META tag.  This requires special handling because of the
@@ -762,7 +763,7 @@
  
    if (http_equiv && 0 == c_strcasecmp (http_equiv, "refresh"))
      {
-@@ -677,6 +1237,36 @@
+@@ -677,6 +1238,36 @@
              }
          }
      }
