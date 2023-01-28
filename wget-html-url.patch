@@ -1,5 +1,5 @@
---- wget-1.21.3/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
-+++ wget-1.21.3/src/html-url-extended.c	2022-12-24 15:00:25.154919449 +0300
+--- wget-1.21.2/src/html-url.c	2021-09-07 21:56:08.000000000 +0300
++++ wget-1.21.2/src/html-url-extended.c	2023-01-28 09:28:58.455751639 +0300
 @@ -61,30 +61,127 @@
  
  enum {
@@ -726,12 +726,11 @@
  
  static void
  tag_handle_form (int tagid _GL_UNUSED, struct taginfo *tag, struct map_context *ctx)
-@@ -530,40 +1088,47 @@
-      known not to be, such as style sheet and shortcut icon:
+@@ -531,39 +1089,49 @@
  
       <link rel="stylesheet" href="..."> or <link rel="alternate stylesheet" href="...">
--     <link rel="shortcut icon" href="..."> or <link rel="icon" href="...">
-+     <link rel="shortcut icon" href="..."> or <link rel="icon" href="..."> or <link rel="apple-touch-icon" href="...">
+      <link rel="shortcut icon" href="..."> or <link rel="icon" href="...">
++     or <link rel="apple-touch-icon" href="...">
    */
    if (href)
      {
@@ -740,8 +739,10 @@
 -      if (up)
 +      char *rel = find_attr (tag, "rel", NULL);
 +
-+      /* The dns-prefetch links are only useful for DNS requests, not HTTP ones */
-+      if (0 == c_strcasecmp (rel, "dns-prefetch"))
++      /* The preconnect/dns-prefetch links are used to establich a connection to a domain,
++         not to an exact file, so are useless for us
++      */
++      if (0 == c_strcasecmp (rel, "preconnect") || 0 == c_strcasecmp (rel, "dns-prefetch"))
 +        return;
 +      else
          {
@@ -802,7 +803,7 @@
                  }
              }
          }
-@@ -571,13 +1136,16 @@
+@@ -571,13 +1139,16 @@
  }
  
  /* Handle the META tag.  This requires special handling because of the
@@ -821,7 +822,7 @@
  
    if (http_equiv && 0 == c_strcasecmp (http_equiv, "refresh"))
      {
-@@ -677,6 +1245,36 @@
+@@ -677,6 +1248,36 @@
              }
          }
      }
