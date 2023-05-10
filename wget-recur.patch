@@ -1,0 +1,59 @@
+--- "wget-1.21.2/src/recur.c"	2021-09-07 21:56:08.000000000 +0300
++++ "wget-1.21.2/src/recur-patched.c"	2023-05-10 23:29:32.184327257 +0300
+@@ -657,7 +657,29 @@
+       goto out;
+     }
+ 
+-  /* 4. Check for parent directory.
++  /* 4 (5). If the file does not match the acceptance list, or is on the
++     rejection list, chuck it out.  The same goes for the directory
++     exclusion and inclusion lists.
++     NB. This check should be performed before the check for parent directory
++     to always mark in the log file the excluded URLs, even if they are
++     outside the no_parent scope.  */
++  if (opt.includes || opt.excludes)
++    {
++      if (!accdir (u->dir))
++        {
++          DEBUGP (("%s (%s) is excluded/not-included.\n", url, u->dir));
++          reason = WG_RR_LIST;
++          goto out;
++        }
++    }
++  if (!accept_url (url))
++    {
++      DEBUGP (("%s is excluded/not-included through regex.\n", url));
++      reason = WG_RR_REGEX;
++      goto out;
++    }
++
++  /* 5 (4). Check for parent directory.
+ 
+      If we descended to a different host or changed the scheme, ignore
+      opt.no_parent.  Also ignore it for documents needed to display
+@@ -678,25 +700,6 @@
+         }
+     }
+ 
+-  /* 5. If the file does not match the acceptance list, or is on the
+-     rejection list, chuck it out.  The same goes for the directory
+-     exclusion and inclusion lists.  */
+-  if (opt.includes || opt.excludes)
+-    {
+-      if (!accdir (u->dir))
+-        {
+-          DEBUGP (("%s (%s) is excluded/not-included.\n", url, u->dir));
+-          reason = WG_RR_LIST;
+-          goto out;
+-        }
+-    }
+-  if (!accept_url (url))
+-    {
+-      DEBUGP (("%s is excluded/not-included through regex.\n", url));
+-      reason = WG_RR_REGEX;
+-      goto out;
+-    }
+-
+   /* 6. Check for acceptance/rejection rules.  We ignore these rules
+      for directories (no file name to match) and for non-leaf HTMLs,
+      which can lead to other files that do need to be downloaded.  (-p
