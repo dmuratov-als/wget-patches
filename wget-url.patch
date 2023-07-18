@@ -1,0 +1,32 @@
+--- wget-1.21.2/src/url.c	2021-09-07 21:56:08.000000000 +0300
++++ wget-1.21.2/src/url-patched.c	2023-07-18 17:11:23.270210191 +0300
+@@ -1049,10 +1049,9 @@
+ }
+ 
+ /* Note: URL's "full path" is the path with the query string and
+-   params appended.  The "fragment" (#foo) is intentionally ignored,
+-   but that might be changed.  For example, if the original URL was
+-   "http://host:port/foo/bar/baz;bullshit?querystring#uselessfragment",
+-   the full path will be "/foo/bar/baz;bullshit?querystring".  */
++   params appended.  For example, if the original URL was
++   "http://host:port/foo/bar/baz;bullshit?querystring#fragment",
++   the full path will be "/foo/bar/baz;bullshit?querystring#fragment".  */
+ 
+ /* Return the length of the full path, without the terminating
+    zero.  */
+@@ -1067,6 +1066,7 @@
+   FROB (path);
+   FROB (params);
+   FROB (query);
++  FROB (fragment);
+ 
+ #undef FROB
+ 
+@@ -1091,6 +1091,7 @@
+   FROB (path, '/');
+   FROB (params, ';');
+   FROB (query, '?');
++  FROB (fragment, '#');
+ 
+ #undef FROB
+ }
