@@ -1,0 +1,10 @@
+--- wget-1.21.2/src/url.h	2023-07-22 01:04:55.426943429 +0300
++++ wget-1.21.2/src/url-patched.h	2023-07-22 01:04:41.545813956 +0300
+@@ -110,6 +110,7 @@
+ struct url *url_parse (const char *, int *, struct iri *iri, bool percent_encode);
+ char *url_error (const char *, int);
+ char *url_full_path (const struct url *);
++char *url_full_path_no_fragment (const struct url *);
+ void url_set_dir (struct url *, const char *);
+ void url_set_file (struct url *, const char *);
+ void url_free (struct url *);

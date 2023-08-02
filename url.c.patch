@@ -1,0 +1,77 @@
+--- wget-1.21.2/src/url.c	2021-09-07 21:56:08.000000000 +0300
++++ wget-1.21.2/src/url-patched.c	2023-08-02 23:36:17.759893215 +0300
+@@ -1067,6 +1067,7 @@
+   FROB (path);
+   FROB (params);
+   FROB (query);
++  FROB (fragment);
+ 
+ #undef FROB
+ 
+@@ -1091,6 +1092,7 @@
+   FROB (path, '/');
+   FROB (params, ';');
+   FROB (query, '?');
++  FROB (fragment, '#');
+ 
+ #undef FROB
+ }
+@@ -1109,6 +1111,58 @@
+   full_path[length] = '\0';
+ 
+   return full_path;
++}
++
++/* Quick and dirty approach to keep the fragment while making the
++   requests to servers (which otherwise respond with "400 Bad Request")
++   without the fragment (see initialize_request в http.c). */
++
++static int
++full_path_length_no_fragment (const struct url *url)
++{
++  int len = 0;
++
++#define FROB(el) if (url->el) len += 1 + strlen (url->el)
++
++  FROB (path);
++  FROB (params);
++  FROB (query);
++
++#undef FROB
++
++  return len;
++}
++
++static void
++full_path_write_no_fragment (const struct url *url, char *where)
++{
++#define FROB(el, chr) do {                      \
++  char *f_el = url->el;                         \
++  if (f_el) {                                   \
++    int l = strlen (f_el);                      \
++    *where++ = chr;                             \
++    memcpy (where, f_el, l);                    \
++    where += l;                                 \
++  }                                             \
++} while (0)
++
++  FROB (path, '/');
++  FROB (params, ';');
++  FROB (query, '?');
++
++#undef FROB
++}
++
++char *
++url_full_path_no_fragment (const struct url *url)
++{
++  int length = full_path_length_no_fragment (url);
++  char *full_path = xmalloc (length + 1);
++
++  full_path_write_no_fragment (url, full_path);
++  full_path[length] = '\0';
++
++  return full_path;
+ }
+ 
+ /* Unescape CHR in an otherwise escaped STR.  Used to selectively
